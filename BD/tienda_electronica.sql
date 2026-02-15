@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 11-02-2026 a las 01:44:43
+-- Tiempo de generación: 15-02-2026 a las 05:28:46
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -24,64 +24,34 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `detalle_venta`
---
-
-CREATE TABLE `detalle_venta` (
-  `id_detalle` int(11) NOT NULL,
-  `id_venta` int(11) NOT NULL,
-  `id_producto` int(11) NOT NULL,
-  `cantidad` int(11) NOT NULL,
-  `precio_unitario` decimal(10,2) NOT NULL,
-  `subtotal` decimal(10,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `detalle_venta`
---
-
-INSERT INTO `detalle_venta` (`id_detalle`, `id_venta`, `id_producto`, `cantidad`, `precio_unitario`, `subtotal`) VALUES
-(1, 1, 2, 1, 549.00, 549.00),
-(2, 2, 3, 1, 1299.00, 1299.00),
-(3, 3, 5, 100, 3.50, 350.00),
-(4, 4, 7, 20, 12.00, 240.00),
-(5, 5, 8, 1, 79.00, 79.00),
-(6, 6, 10, 48, 25.00, 1200.00),
-(7, 7, 9, 5, 35.00, 175.00),
-(8, 8, 1, 1, 1899.00, 1899.00),
-(9, 9, 6, 10, 4.00, 40.00),
-(10, 10, 4, 5, 89.00, 445.00);
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `productos`
 --
 
 CREATE TABLE `productos` (
   `id_producto` int(11) NOT NULL,
-  `marca` varchar(100) NOT NULL,
-  `precio` decimal(10,2) NOT NULL,
+  `nombre` varchar(255) DEFAULT NULL,
+  `marca` varchar(255) DEFAULT NULL,
+  `precio` double NOT NULL,
   `stock` int(11) NOT NULL,
-  `descripcion` text DEFAULT NULL,
-  `imagen` varchar(255) DEFAULT NULL
+  `descripcion` varchar(255) DEFAULT NULL,
+  `imagen` varchar(500) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `productos`
 --
 
-INSERT INTO `productos` (`id_producto`, `marca`, `precio`, `stock`, `descripcion`, `imagen`) VALUES
-(1, 'Intel', 1899.00, 25, 'Microcontrolador Intel Edison', NULL),
-(2, 'Arduino', 549.00, 40, 'Placa Arduino Uno R3', NULL),
-(3, 'Raspberry Pi', 1299.00, 15, 'Raspberry Pi 4 Modelo B 4GB RAM', NULL),
-(4, 'Texas Instruments', 89.00, 100, 'Regulador de voltaje LM7805', NULL),
-(5, 'Generic', 3.50, 500, 'Resistencia 220 ohms 1/4W', NULL),
-(6, 'Generic', 4.00, 450, 'Capacitor electrolítico 100uF 16V', NULL),
-(7, 'ON Semiconductor', 12.00, 200, 'Transistor NPN 2N2222', NULL),
-(8, 'Microchip', 79.00, 120, 'Microcontrolador PIC16F877A', NULL),
-(9, 'Generic', 35.00, 80, 'Display LCD 16x2', NULL),
-(10, 'Generic', 25.00, 150, 'Sensor de temperatura LM35', NULL);
+INSERT INTO `productos` (`id_producto`, `nombre`, `marca`, `precio`, `stock`, `descripcion`, `imagen`) VALUES
+(1, 'Laptop HP 15\"', 'HP', 13200, 8, 'Laptop Intel i5, 8GB RAM, 512GB SSD', 'https://mx-media.hptiendaenlinea.com/catalog/product/cache/b3b166914d87ce343d4dc5ec5117b502/7/y/7y9b0la.png'),
+(2, 'Mouse Inalámbrico M185', 'Logitech', 299, 45, 'Mouse inalámbrico USB color negro', 'https://m.media-amazon.com/images/I/61TjXszTyeL.jpg'),
+(3, 'Teclado Mecánico K552', 'Redragon', 1199, 20, 'Teclado mecánico RGB switches azules', 'https://m.media-amazon.com/images/I/61j-z3qH4CL._AC_UF894,1000_QL80_.jpg'),
+(4, 'Monitor 24\" LED', 'Samsung', 3150, 12, 'Monitor Full HD 75Hz HDMI', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSexmnjQ61KgsbNV1WM5aggagjnD8C6hK4CEg&s'),
+(5, 'Disco Duro 1TB', 'Seagate', 1450, 18, 'Disco duro externo USB 3.0', 'https://m.media-amazon.com/images/I/51TfwWlcluL._AC_SY355_.jpg'),
+(6, 'Audífonos Bluetooth WH-CH520', 'Sony', 980, 25, 'Audífonos inalámbricos batería 50h', 'https://m.media-amazon.com/images/I/41lArSiD5hL._AC_UF1000,1000_QL80_.jpg'),
+(7, 'Tablet Galaxy Tab A8', 'Samsung', 5200, 10, 'Tablet 10.5 pulgadas 64GB', 'https://m.media-amazon.com/images/I/71g9X7W9K3L.jpg'),
+(8, 'Memoria USB 64GB', 'Kingston', 180, 100, 'USB 3.2 alta velocidad', 'https://www.officedepot.com.mx/medias/64779.gif-1200ftw?context=bWFzdGVyfHJvb3R8MTIzODQyfGltYWdlL2pwZWd8YURZeUwyaGtNQzg1TkRFMk5qRTFPREl4TXpReUxtcHdad3wzNDBmZjBmZTRjOTc1ZGM3MGMyZGI2MzI0MzAwMTMwYzI1ODEwZjEyNGNjM2I3MjQwMTQ5MTcwZjQyZjI3Zjdm'),
+(9, 'Impresora Multifuncional L3250', 'Epson', 4200, 7, 'Impresora tinta continua WiFi', 'https://mediaserver.goepson.com/ImConvServlet/imconv/19149835d19c96e7a8926f68cbf4822e506a73c2/515Wx515H?use=productpictures&hybrisId=B2C&assetDescr=L3250_SPT_C11CJ67301_384x286'),
+(10, 'Webcam HD 1080p', 'Logitech', 850, 30, 'Cámara web Full HD con micrófono', 'https://m.media-amazon.com/images/I/81-rvqTiJnL.jpg');
 
 -- --------------------------------------------------------
 
@@ -91,8 +61,8 @@ INSERT INTO `productos` (`id_producto`, `marca`, `precio`, `stock`, `descripcion
 
 CREATE TABLE `ventas` (
   `id_venta` int(11) NOT NULL,
-  `fecha` datetime DEFAULT current_timestamp(),
-  `total` decimal(10,2) NOT NULL
+  `fecha` varchar(255) DEFAULT NULL,
+  `total` double DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -100,73 +70,16 @@ CREATE TABLE `ventas` (
 --
 
 INSERT INTO `ventas` (`id_venta`, `fecha`, `total`) VALUES
-(1, '2026-02-10 18:43:30', 549.00),
-(2, '2026-02-10 18:43:30', 1299.00),
-(3, '2026-02-10 18:43:30', 350.00),
-(4, '2026-02-10 18:43:30', 240.00),
-(5, '2026-02-10 18:43:30', 79.00),
-(6, '2026-02-10 18:43:30', 1200.00),
-(7, '2026-02-10 18:43:30', 175.00),
-(8, '2026-02-10 18:43:30', 1899.00),
-(9, '2026-02-10 18:43:30', 70.00),
-(10, '2026-02-10 18:43:30', 450.00);
-
---
--- Índices para tablas volcadas
---
-
---
--- Indices de la tabla `detalle_venta`
---
-ALTER TABLE `detalle_venta`
-  ADD PRIMARY KEY (`id_detalle`),
-  ADD KEY `id_venta` (`id_venta`),
-  ADD KEY `id_producto` (`id_producto`);
-
---
--- Indices de la tabla `productos`
---
-ALTER TABLE `productos`
-  ADD PRIMARY KEY (`id_producto`);
-
---
--- Indices de la tabla `ventas`
---
-ALTER TABLE `ventas`
-  ADD PRIMARY KEY (`id_venta`);
-
---
--- AUTO_INCREMENT de las tablas volcadas
---
-
---
--- AUTO_INCREMENT de la tabla `detalle_venta`
---
-ALTER TABLE `detalle_venta`
-  MODIFY `id_detalle` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
-
---
--- AUTO_INCREMENT de la tabla `productos`
---
-ALTER TABLE `productos`
-  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
-
---
--- AUTO_INCREMENT de la tabla `ventas`
---
-ALTER TABLE `ventas`
-  MODIFY `id_venta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
-
---
--- Restricciones para tablas volcadas
---
-
---
--- Filtros para la tabla `detalle_venta`
---
-ALTER TABLE `detalle_venta`
-  ADD CONSTRAINT `detalle_venta_ibfk_1` FOREIGN KEY (`id_venta`) REFERENCES `ventas` (`id_venta`),
-  ADD CONSTRAINT `detalle_venta_ibfk_2` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`);
+(1, '2026-02-10', 13200),
+(2, '2026-02-10', 598),
+(3, '2026-02-10', 3150),
+(4, '2026-02-10', 1450),
+(5, '2026-02-11', 980),
+(6, '2026-02-12', 5200),
+(7, '2026-02-12', 360),
+(8, '2026-02-12', 8400),
+(9, '2026-02-13', 850),
+(10, '2026-02-13', 1199);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
