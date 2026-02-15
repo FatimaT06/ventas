@@ -1,11 +1,8 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import '../core/theme.dart';
 import '../core/models.dart';
 import '../shell/shell.dart';
 import '../widgets/shared.dart';
-import 'home_page.dart'; // Asegúrate de tener tu HomePage importado
 
 class CarritoPage extends StatelessWidget {
   const CarritoPage({super.key});
@@ -62,7 +59,7 @@ class CarritoPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Tu carrito está vacío',
+              'Tu carrito esta vacio',
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
@@ -120,6 +117,15 @@ class _CartRow extends StatelessWidget {
             decoration: BoxDecoration(
               color: C.lightGrey,
               borderRadius: BorderRadius.circular(10),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                item.producto.imagen,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) =>
+                    const Icon(Icons.broken_image, color: Colors.grey),
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -257,57 +263,6 @@ class _Row extends StatelessWidget {
 }
 
 class _Sheet extends StatelessWidget {
-  const _Sheet({super.key});
-
-  Future<void> _procesarCompra(BuildContext context) async {
-    try {
-      // Prepara el carrito para enviar
-      final carrito = cart.items
-          .map((i) => {'id_producto': i.producto.id, 'cantidad': i.cantidad})
-          .toList();
-
-      final response = await http.post(
-        Uri.parse('https://api-production-8c3e.up.railway.app/comprar'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'carrito': carrito}),
-      );
-
-      if (response.statusCode == 200) {
-        // Compra exitosa
-        cart.clear();
-        Navigator.pop(context); // cierra el modal
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomePage()),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Compra realizada correctamente'),
-            backgroundColor: C.black,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      } else {
-        final data = jsonDecode(response.body);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(data['error'] ?? 'Error al procesar compra'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error de conexión: $e'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -385,8 +340,20 @@ class _Sheet extends StatelessWidget {
               Expanded(
                 child: FilledBtn(
                   label: 'Confirmar',
-                  onTap: () =>
-                      _procesarCompra(context), // aquí se llama a la API
+                  onTap: () {
+                    cart.clear();
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Venta registrada'),
+                        backgroundColor: C.black,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],

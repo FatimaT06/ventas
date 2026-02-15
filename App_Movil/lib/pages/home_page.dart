@@ -20,8 +20,7 @@ class _HomePageState extends State<HomePage> {
   bool _loading = true;
   String? _error;
 
-  final String apiUrl =
-      "https://api-production-8c3e.up.railway.app/productos"; // 👈 CAMBIA ESTA URL
+  final String apiUrl = "https://api-production-8c3e.up.railway.app/productos";
 
   @override
   void initState() {
