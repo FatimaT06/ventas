@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 import '../core/theme.dart';
 import '../core/models.dart';
 import '../shell/shell.dart';
@@ -13,13 +16,42 @@ class CatalogoPage extends StatefulWidget {
 }
 
 class _State extends State<CatalogoPage> {
-  String? _cat;
+  List<Producto> _productos = [];
+  bool _loading = true;
+  String? _error;
 
-  List<Producto> get _list =>
-      _cat == null ? kProductos : kProductos.where((p) => p.categoria == _cat).toList();
+  final String apiUrl = "https://api-production-8c3e.up.railway.app/productos";
 
-  List<String> get _cats =>
-      ['Todos', ...kProductos.map((p) => p.categoria).toSet()];
+  @override
+  void initState() {
+    super.initState();
+    fetchProductos();
+  }
+
+  Future<void> fetchProductos() async {
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        final List data = json.decode(response.body);
+
+        setState(() {
+          _productos = data.map((e) => Producto.fromJson(e)).toList();
+          _loading = false;
+        });
+      } else {
+        setState(() {
+          _error = "Error del servidor";
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = "Error de conexión";
+        _loading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,27 +63,42 @@ class _State extends State<CatalogoPage> {
             child: PageHeader(
               title: 'Catalogo',
               action: Container(
-                width: 38, height: 38,
-                decoration: BoxDecoration(color: C.lightGrey, borderRadius: BorderRadius.circular(10)),
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: C.lightGrey,
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 child: const Icon(Icons.tune_rounded, size: 17, color: C.black),
               ),
             ),
           ),
 
-          SliverToBoxAdapter(child: _Chips(cats: _cats, selected: _cat, onSelect: (v) => setState(() => _cat = v))),
-
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, mainAxisSpacing: 12, crossAxisSpacing: 12, childAspectRatio: 0.68,
+          /// LOADING
+          if (_loading)
+            const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            )
+          /// ERROR
+          else if (_error != null)
+            SliverFillRemaining(
+              child: Center(
+                child: Text(_error!, style: const TextStyle(color: Colors.red)),
               ),
-              delegate: SliverChildBuilderDelegate(
-                (ctx, i) => _Card(producto: _list[i]),
-                childCount: _list.length,
+            )
+          else ...[
+            SliverPadding(
+              padding: const EdgeInsets.all(16),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 0.68,
+                ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -63,7 +110,11 @@ class _Chips extends StatelessWidget {
   final String? selected;
   final void Function(String?) onSelect;
 
-  const _Chips({required this.cats, required this.selected, required this.onSelect});
+  const _Chips({
+    required this.cats,
+    required this.selected,
+    required this.onSelect,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +127,7 @@ class _Chips extends StatelessWidget {
         itemBuilder: (_, i) {
           final cat = cats[i];
           final on = (cat == 'Todos' && selected == null) || cat == selected;
+
           return GestureDetector(
             onTap: () => onSelect(cat == 'Todos' ? null : cat),
             child: AnimatedContainer(
@@ -87,7 +139,14 @@ class _Chips extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: on ? C.black : C.border),
               ),
-              child: Text(cat, style: TextStyle(color: on ? C.white : C.grey, fontWeight: on ? FontWeight.w600 : FontWeight.w400, fontSize: 12)),
+              child: Text(
+                cat,
+                style: TextStyle(
+                  color: on ? C.white : C.grey,
+                  fontWeight: on ? FontWeight.w600 : FontWeight.w400,
+                  fontSize: 12,
+                ),
+              ),
             ),
           );
         },
@@ -103,9 +162,16 @@ class _Card extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetallePage(producto: producto))),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => DetallePage(producto: producto)),
+      ),
       child: Container(
-        decoration: BoxDecoration(color: C.white, borderRadius: BorderRadius.circular(15), border: Border.all(color: C.border)),
+        decoration: BoxDecoration(
+          color: C.white,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: C.border),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -115,7 +181,21 @@ class _Card extends StatelessWidget {
                   color: C.lightGrey,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
                 ),
-                child: Center(child: Icon(iconForCat(producto.categoria), size: 42, color: C.black.withOpacity(0.11))),
+                child: producto.imagen.isNotEmpty
+                    ? Image.network(
+                        producto.imagen,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.image_not_supported,
+                          size: 40,
+                          color: Colors.black26,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.inventory_2_outlined,
+                        size: 42,
+                        color: Colors.black26,
+                      ),
               ),
             ),
             Padding(
@@ -123,38 +203,55 @@ class _Card extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(producto.nombre, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: C.black), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  Text(
+                    producto.nombre,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                      color: C.black,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   const SizedBox(height: 2),
-                  Text(producto.marca, style: const TextStyle(fontSize: 10, color: C.grey)),
+                  Text(
+                    producto.marca,
+                    style: const TextStyle(fontSize: 10, color: C.grey),
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('\$${producto.precio.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: C.black)),
-                      ListenableBuilder(
-                        listenable: cart,
-                        builder: (_, __) => GestureDetector(
-                          onTap: () {
-                            cart.add(producto);
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      Text(
+                        '\$${producto.precio.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                          color: C.black,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          cart.add(producto);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
                               content: Text('${producto.nombre} agregado'),
                               duration: const Duration(seconds: 1),
                               backgroundColor: C.black,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ));
-                          },
-                          child: Container(
-                            width: 28, height: 28,
-                            decoration: BoxDecoration(
-                              color: cart.contains(producto.id) ? C.black : C.lightGrey,
-                              borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Icon(
-                              cart.contains(producto.id) ? Icons.check : Icons.add,
-                              size: 14,
-                              color: cart.contains(producto.id) ? C.white : C.black,
-                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: C.lightGrey,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.add,
+                            size: 14,
+                            color: C.black,
                           ),
                         ),
                       ),
